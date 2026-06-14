@@ -333,6 +333,129 @@ const getInventoryStructure = async (req, res) => {
   }
 };
 
+const getAbcAnalysis = async (req, res) => {
+  try {
+    const db = require("../models");
+    const days = parseInt(req.query.days) || 90;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const stocks = await db.Stock.findAll({
+      where: { deleted: false },
+      include: [
+        { model: db.Suppliers, as: "supplier", attributes: ["id", "name"] },
+        { model: db.Location, as: "location", attributes: ["id", "aisle", "rack", "shelf", "bin"] }
+      ]
+    });
+
+    const exportDetails = await db.ExportDetails.findAll({
+      attributes: [
+        "productId",
+        [db.Sequelize.fn("SUM", db.Sequelize.col("quantity")), "totalQty"]
+      ],
+      include: [
+        {
+          model: db.ExportReceipts,
+          as: "exportReceiptData",
+          where: {
+            export_date: {
+              [db.Sequelize.Op.gte]: startDate,
+            },
+          },
+          attributes: [],
+        },
+      ],
+      group: ["productId"],
+      raw: true,
+    });
+
+    const exportMap = {};
+    exportDetails.forEach((d) => {
+      exportMap[d.productId] = Number(d.totalQty) || 0;
+    });
+
+    const rawProducts = stocks.map((s) => {
+      const product = s.toJSON();
+      const totalQty = exportMap[product.id] || 0;
+      const price = Number(product.price) || 0;
+      const exportValue = totalQty * price;
+      return {
+        ...product,
+        totalQty,
+        price,
+        exportValue,
+      };
+    });
+
+    rawProducts.sort((a, b) => b.exportValue - a.exportValue);
+
+    const totalValueSum = rawProducts.reduce((sum, p) => sum + p.exportValue, 0);
+    const totalQtySum = rawProducts.reduce((sum, p) => sum + p.totalQty, 0);
+
+    let runningSum = 0;
+    let countA = 0;
+    let countB = 0;
+    let countC = 0;
+
+    const classifiedProducts = rawProducts.map((p, idx) => {
+      runningSum += p.exportValue;
+      const share = totalValueSum > 0 ? (p.exportValue / totalValueSum) * 100 : 0;
+      const cumulativeShare = totalValueSum > 0 ? (runningSum / totalValueSum) * 100 : 0;
+
+      let category = "C";
+      if (totalValueSum === 0) {
+        category = "C";
+        countC++;
+      } else if (cumulativeShare <= 80 || idx === 0) {
+        category = "A";
+        countA++;
+      } else if (cumulativeShare <= 95) {
+        category = "B";
+        countB++;
+      } else {
+        category = "C";
+        countC++;
+      }
+
+      const turnover = p.totalQty / Math.max(1, p.stock);
+
+      let recommendation = "";
+      if (category === "A") {
+        recommendation = "Xếp ở vị trí dễ xuất nhập (Khu A, Kệ 1, Kệ 2, Tầng 1) gần cổng ra vào.";
+      } else if (category === "B") {
+        recommendation = "Xếp ở vị trí trung bình (Khu B, Tầng 2).";
+      } else {
+        recommendation = "Xếp ở vị trí xa hoặc trên cao (Khu C, Khu D, Tầng 3) để tối ưu không gian.";
+      }
+
+      return {
+        ...p,
+        share: Number(share.toFixed(2)),
+        cumulativeShare: Number(cumulativeShare.toFixed(2)),
+        category,
+        turnover: Number(turnover.toFixed(2)),
+        recommendation,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      days,
+      summary: {
+        totalValue: totalValueSum,
+        totalQty: totalQtySum,
+        countA,
+        countB,
+        countC,
+      },
+      products: classifiedProducts,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 module.exports = {
   getTotalRevenue,
   getGeneralStats,
@@ -343,6 +466,7 @@ module.exports = {
   getAllOrders,
   getAllStock,
   getAllCustomers,
-  getInventoryStructure
+  getInventoryStructure,
+  getAbcAnalysis
 };
 

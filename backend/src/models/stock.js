@@ -28,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "supplierId",
         as: "supplier",
       });
+      Stock.hasMany(models.InventoryCountDetail, {
+        foreignKey: "productId",
+        as: "inventoryCountDetailData",
+      });
+      Stock.belongsTo(models.Location, {
+        foreignKey: "locationId",
+        as: "location",
+      });
     }
   }
   Stock.init(
@@ -50,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 10,
       },
       supplierId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      locationId: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },

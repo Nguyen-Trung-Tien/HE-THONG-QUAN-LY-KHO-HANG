@@ -24,7 +24,7 @@ function Sidebar({ onClose }) {
         </svg>
       ),
     },
-    (currentUser?.role === "admin" || currentUser?.role === "dev") && {
+    (currentUser?.role === "admin" || currentUser?.role === "dev" || currentUser?.role === "accountant") && {
       id: "stats",
       path: "/stats",
       name: "Thống kê",
@@ -245,7 +245,7 @@ function Sidebar({ onClose }) {
           </p>
           <div className="flex items-center justify-between relative z-10">
             <span className="text-[9px] font-black text-text-tertiary dark:text-dark-text-tertiary tracking-widest">
-              V3.5.0
+              V3.6.0
             </span>
             <div className="size-1.5 rounded-full bg-success animate-pulse shadow-sm shadow-success/20"></div>
           </div>

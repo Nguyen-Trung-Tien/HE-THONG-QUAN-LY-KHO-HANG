@@ -67,11 +67,48 @@ const createExportReceipt = async (data) => {
         const oldQuantity = stock.stock;
         await stock.decrement("stock", { by: d.quantity, transaction: t });
 
-        await db.ExportDetails.create({
-          exportId: receipt.id,
-          productId: d.productId,
-          quantity: d.quantity,
-        }, { transaction: t });
+        // FIFO/FEFO Batch Allocation
+        let remainingQty = Number(d.quantity);
+        const sortedBatches = await db.StockBatch.findAll({
+          where: { productId: d.productId, quantity: { [db.Op?.gt || db.Sequelize.Op.gt]: 0 } },
+          order: [
+            [db.sequelize.literal('CASE WHEN expiryDate IS NULL THEN 1 ELSE 0 END'), 'ASC'],
+            ['expiryDate', 'ASC'],
+            ['id', 'ASC']
+          ],
+          transaction: t
+        });
+
+        const totalAvailableInBatches = sortedBatches.reduce((sum, b) => sum + b.quantity, 0);
+        if (totalAvailableInBatches < remainingQty) {
+          throw new Error(`Không đủ hàng tồn trong các lô cho sản phẩm ${stock.name} (Yêu cầu: ${remainingQty}, Hiện có trong các lô: ${totalAvailableInBatches})`);
+        }
+
+        for (const batch of sortedBatches) {
+          if (remainingQty <= 0) break;
+
+          const deductQty = Math.min(batch.quantity, remainingQty);
+          await batch.decrement("quantity", { by: deductQty, transaction: t });
+
+          await db.ExportDetails.create({
+            exportId: receipt.id,
+            productId: d.productId,
+            quantity: deductQty,
+            batchNumber: batch.batchNumber,
+          }, { transaction: t });
+
+          remainingQty -= deductQty;
+        }
+
+        // Fallback check
+        if (remainingQty > 0) {
+          await db.ExportDetails.create({
+            exportId: receipt.id,
+            productId: d.productId,
+            quantity: remainingQty,
+            batchNumber: null,
+          }, { transaction: t });
+        }
 
         await db.InventoryLog.create({
           stockId: stock.id,
@@ -101,7 +138,7 @@ const updateExportReceipt = async (id, data) => {
     const receipt = await db.ExportReceipts.findByPk(id, { transaction: t });
     if (!receipt) throw new Error("Export receipt not found");
 
-    // 1. Revert old stock levels
+    // 1. Revert old stock levels and batch levels
     const oldDetails = await db.ExportDetails.findAll({
       where: { exportId: id },
       transaction: t,
@@ -111,6 +148,15 @@ const updateExportReceipt = async (id, data) => {
       const stock = await db.Stock.findByPk(oldItem.productId, { transaction: t });
       if (stock) {
         await stock.increment("stock", { by: Number(oldItem.quantity), transaction: t });
+      }
+      if (oldItem.batchNumber) {
+        const batch = await db.StockBatch.findOne({
+          where: { productId: oldItem.productId, batchNumber: oldItem.batchNumber },
+          transaction: t
+        });
+        if (batch) {
+          await batch.increment("quantity", { by: Number(oldItem.quantity), transaction: t });
+        }
       }
     }
 
@@ -130,11 +176,47 @@ const updateExportReceipt = async (id, data) => {
 
         await stock.decrement("stock", { by: d.quantity, transaction: t });
 
-        await db.ExportDetails.create({
-          exportId: id,
-          productId: d.productId,
-          quantity: d.quantity,
-        }, { transaction: t });
+        // FIFO/FEFO Batch Allocation
+        let remainingQty = Number(d.quantity);
+        const sortedBatches = await db.StockBatch.findAll({
+          where: { productId: d.productId, quantity: { [db.Op?.gt || db.Sequelize.Op.gt]: 0 } },
+          order: [
+            [db.sequelize.literal('CASE WHEN expiryDate IS NULL THEN 1 ELSE 0 END'), 'ASC'],
+            ['expiryDate', 'ASC'],
+            ['id', 'ASC']
+          ],
+          transaction: t
+        });
+
+        const totalAvailableInBatches = sortedBatches.reduce((sum, b) => sum + b.quantity, 0);
+        if (totalAvailableInBatches < remainingQty) {
+          throw new Error(`Không đủ hàng tồn trong các lô cho sản phẩm ${stock.name} (Yêu cầu: ${remainingQty}, Hiện có trong các lô: ${totalAvailableInBatches})`);
+        }
+
+        for (const batch of sortedBatches) {
+          if (remainingQty <= 0) break;
+
+          const deductQty = Math.min(batch.quantity, remainingQty);
+          await batch.decrement("quantity", { by: deductQty, transaction: t });
+
+          await db.ExportDetails.create({
+            exportId: id,
+            productId: d.productId,
+            quantity: deductQty,
+            batchNumber: batch.batchNumber,
+          }, { transaction: t });
+
+          remainingQty -= deductQty;
+        }
+
+        if (remainingQty > 0) {
+          await db.ExportDetails.create({
+            exportId: id,
+            productId: d.productId,
+            quantity: remainingQty,
+            batchNumber: null,
+          }, { transaction: t });
+        }
 
         await db.InventoryLog.create({
           stockId: stock.id,
@@ -162,7 +244,7 @@ const deleteExportReceipt = async (id) => {
     const receipt = await db.ExportReceipts.findByPk(id, { transaction: t });
     if (!receipt) throw new Error("Export receipt not found");
 
-    // Revert stock before deleting
+    // Revert stock and batches before deleting
     const details = await db.ExportDetails.findAll({
       where: { exportId: id },
       transaction: t,
@@ -172,6 +254,15 @@ const deleteExportReceipt = async (id) => {
       const stock = await db.Stock.findByPk(item.productId, { transaction: t });
       if (stock) {
         await stock.increment("stock", { by: Number(item.quantity), transaction: t });
+      }
+      if (item.batchNumber) {
+        const batch = await db.StockBatch.findOne({
+          where: { productId: item.productId, batchNumber: item.batchNumber },
+          transaction: t
+        });
+        if (batch) {
+          await batch.increment("quantity", { by: Number(item.quantity), transaction: t });
+        }
       }
     }
 

@@ -107,3 +107,15 @@ export const fetchInventoryStructure = async () => {
     throw error.response?.data || new Error("Không thể lấy cơ cấu hàng hóa");
   }
 };
+
+export const fetchAbcAnalysis = async (days = 90) => {
+  try {
+    const response = await axiosInstance.get(`/statistics/abc-analysis`, {
+      params: { days }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching ABC analysis:", error);
+    throw error.response?.data || new Error("Không thể lấy báo cáo phân tích ABC");
+  }
+};

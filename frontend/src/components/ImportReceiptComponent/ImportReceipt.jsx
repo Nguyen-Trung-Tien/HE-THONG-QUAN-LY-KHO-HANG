@@ -29,6 +29,7 @@ const CURRENCY_UNIT = "VND";
 
 export default function ImportReceipt() {
   const currentUser = useSelector((state) => state.user.currentUser);
+  const isAccountant = currentUser?.role === "accountant";
 
   const [receipts, setReceipts] = useState([]);
   const [supplierOptions, setSupplierOptions] = useState([]);
@@ -163,6 +164,8 @@ export default function ImportReceipt() {
             StockProductData: item.StockProductData || { name: "", unit: "" },
             quantity: item.quantity || 1,
             price: item.price || 0,
+            batchNumber: item.batchNumber || "",
+            expiryDate: item.expiryDate?.split("T")[0] || "",
           })) || [],
         userId: receipt.userId || currentUser.id,
         userName: `${currentUser.firstName} ${currentUser.lastName}`,
@@ -180,6 +183,8 @@ export default function ImportReceipt() {
             StockProductData: { name: "", unit: "" },
             quantity: 1,
             price: 0,
+            batchNumber: "",
+            expiryDate: "",
           },
         ],
         userId: currentUser.id,
@@ -264,6 +269,8 @@ export default function ImportReceipt() {
           StockProductData: { name: "", unit: "" },
           quantity: 1,
           price: 0,
+          batchNumber: "",
+          expiryDate: "",
         },
       ],
     });
@@ -276,6 +283,10 @@ export default function ImportReceipt() {
 
   const handleReceiptSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (isAccountant) {
+      toast.error("Tài khoản Kế toán không có quyền lập hoặc sửa phiếu!");
+      return;
+    }
     setFormLoading(true);
 
     const { supplierData, import_date, userId, details, note } =
@@ -318,6 +329,8 @@ export default function ImportReceipt() {
         productId: Number(item.productId),
         quantity: Number(item.quantity),
         price: String(item.price),
+        batchNumber: item.batchNumber || null,
+        expiryDate: item.expiryDate || null,
       })),
     };
 
@@ -391,14 +404,16 @@ export default function ImportReceipt() {
               { key: "note", header: "Ghi chú" },
             ]}
           />
-          <Button
-            onClick={() => openReceiptForm()}
-            variant="primary"
-            className="rounded-xl shadow-primary/30 h-10 px-6"
-            leftIcon={<FiPlus className="size-4" />}
-          >
-            Tạo phiếu mới
-          </Button>
+          {!isAccountant && (
+            <Button
+              onClick={() => openReceiptForm()}
+              variant="primary"
+              className="rounded-xl shadow-primary/30 h-10 px-6"
+              leftIcon={<FiPlus className="size-4" />}
+            >
+              Tạo phiếu mới
+            </Button>
+          )}
         </div>
       </div>
 

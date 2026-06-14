@@ -38,7 +38,8 @@ module.exports = {
     try {
       const stockRecord = await db.Stock.findByPk(req.params.id, {
         include: [
-          { model: db.Suppliers, as: "supplier", attributes: ["id", "name"] }
+          { model: db.Suppliers, as: "supplier", attributes: ["id", "name"] },
+          { model: db.StockBatch, as: "batches", attributes: ["id", "batchNumber", "quantity", "expiryDate"] }
         ],
       });
       if (!stockRecord)
@@ -189,6 +190,106 @@ module.exports = {
         message: "Lỗi server",
         error: err.message,
       });
+    }
+  },
+  getReorderSuggestions: async (req, res) => {
+    try {
+      const stocks = await db.Stock.findAll({
+        where: {
+          deleted: false,
+          stock: {
+            [db.Sequelize.Op.lte]: db.Sequelize.col("minStock"),
+          },
+        },
+        include: [
+          { model: db.Suppliers, as: "supplier", attributes: ["id", "name"] }
+        ],
+        order: [["name", "ASC"]],
+      });
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+      const suggestions = stocks.map((p) => {
+        const product = p.toJSON();
+        const suggestedQty = (product.minStock * 3) - product.stock;
+        return {
+          ...product,
+          image: product.image ? `${baseUrl}${product.image}` : null,
+          suggestedQty: suggestedQty > 0 ? suggestedQty : 10,
+        };
+      });
+
+      return res.json(suggestions);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: "Lỗi server",
+        error: err.message,
+      });
+    }
+  },
+  createReorderReceipt: async (req, res) => {
+    const { supplierId, items } = req.body;
+    if (!supplierId || !items || !items.length) {
+      return res.status(400).json({ message: "Thiếu thông tin nhà cung cấp hoặc sản phẩm" });
+    }
+
+    const t = await db.sequelize.transaction();
+    try {
+      const receipt = await db.ImportReceipts.create({
+        supplierId: Number(supplierId),
+        userId: req.user?.id || 1,
+        import_date: new Date(),
+        note: `Đề xuất nhập hàng tự động cho các sản phẩm dưới ngưỡng an toàn`,
+      }, { transaction: t });
+
+      const detailData = items.map((item) => ({
+        importId: receipt.id,
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        price: String(item.price || "0"),
+        batchNumber: item.batchNumber || `AUTO-${Date.now()}`,
+        expiryDate: item.expiryDate || null,
+      }));
+
+      await db.ImportDetails.bulkCreate(detailData, { transaction: t });
+
+      for (const item of items) {
+        const stock = await db.Stock.findByPk(item.productId, { transaction: t });
+        if (stock) {
+          const oldQuantity = stock.stock;
+          await stock.increment("stock", { by: Number(item.quantity), transaction: t });
+          
+          await db.InventoryLog.create({
+            stockId: stock.id,
+            userId: req.user?.id || 1,
+            change_type: "IMPORT",
+            quantity: Number(item.quantity),
+            qtyBefore: oldQuantity,
+            qtyAfter: oldQuantity + Number(item.quantity),
+            note: `Nhập hàng từ phiếu gợi ý tự động #${receipt.id}`,
+          }, { transaction: t });
+
+          const batchNumber = item.batchNumber || `AUTO-${Date.now()}`;
+          const [batch, created] = await db.StockBatch.findOrCreate({
+            where: { productId: item.productId, batchNumber },
+            defaults: {
+              quantity: 0,
+              expiryDate: item.expiryDate || null,
+              purchasePrice: Number(item.price) || 0,
+            },
+            transaction: t,
+          });
+          await batch.increment("quantity", { by: Number(item.quantity), transaction: t });
+        }
+      }
+
+      await t.commit();
+      return res.status(201).json({ success: true, receiptId: receipt.id });
+    } catch (err) {
+      await t.rollback();
+      console.error(err);
+      return res.status(500).json({ message: "Lỗi tạo phiếu nhập tự động", error: err.message });
     }
   },
 };

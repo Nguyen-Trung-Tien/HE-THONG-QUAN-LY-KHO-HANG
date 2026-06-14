@@ -15,6 +15,8 @@ const notificationRouter = require("./notificationRouter");
 const twoFactorRouter = require("./twoFactorRouter");
 const pinRouter = require("./pinRouter");
 const backupRouter = require("./backupRouter");
+const inventoryCountRouter = require("./inventoryCountRouter");
+const locationRouter = require("./locationRouter");
 
 const routes = (app) => {
   app.use("/api/v1/user", UserRouter);
@@ -34,5 +36,7 @@ const routes = (app) => {
   app.use("/api/v1/2fa", twoFactorRouter);
   app.use("/api/v1/pin", pinRouter);
   app.use("/api/v1/backup", backupRouter);
+  app.use("/api/v1/inventory-count", inventoryCountRouter);
+  app.use("/api/v1/locations", locationRouter);
 };
 module.exports = routes;

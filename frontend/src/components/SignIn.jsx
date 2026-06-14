@@ -184,7 +184,7 @@ const SignIn = () => {
             Chào mừng <br /> quay trở lại!
           </h1>
           <p className="text-text-secondary mt-2 text-xs font-semibold tracking-tight text-center">
-            Đăng nhập vào Smart WMS v3.5.0
+            Đăng nhập vào Smart WMS v3.6.0
           </p>
         </div>
 

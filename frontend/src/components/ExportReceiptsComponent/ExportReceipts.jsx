@@ -24,12 +24,14 @@ import ExportExcel from '../common/ExportExcel';
 import ExportPDF from '../common/ExportPDF';
 import { 
   FiPlus, FiSearch, FiTruck, FiUser, FiCalendar, FiFileText, 
-  FiPackage, FiAlertCircle, FiCheckCircle, FiClock, FiTrash2, FiPlusCircle, FiInfo 
+  FiPackage, FiAlertCircle, FiCheckCircle, FiClock, FiTrash2, FiPlusCircle, FiInfo, FiCamera 
 } from "react-icons/fi";
 import { cn } from "../../utils/cn";
+import QRScannerModal from "../common/QRScannerModal";
 
 export default function ExportReceipts() {
   const currentUser = useSelector((state) => state.user.currentUser);
+  const isAccountant = currentUser?.role === "accountant";
   const [receipts, setReceipts] = useState([]);
   const [shippers, setShippers] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -51,6 +53,8 @@ export default function ExportReceipts() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [activeScanIndex, setActiveScanIndex] = useState(null);
   const itemsPerPage = 10;
 
   const loadData = useCallback(async (page = currentPage, searchQuery = search) => {
@@ -127,8 +131,46 @@ export default function ExportReceipts() {
     setForm({ ...form, items: newItems });
   };
 
+  const handleScanSuccess = (scannedText) => {
+    try {
+      let productId = null;
+      try {
+        const parsed = JSON.parse(scannedText);
+        productId = Number(parsed.id);
+      } catch (err) {
+        productId = Number(scannedText);
+      }
+
+      if (isNaN(productId) || !productId) {
+        toast.error("Mã QR không hợp lệ");
+        return;
+      }
+
+      const selectedProduct = stocks.find((s) => s.id === productId);
+      if (!selectedProduct) {
+        toast.error(`Không tìm thấy hàng hóa với ID: ${productId}`);
+        return;
+      }
+
+      if (selectedProduct.stock <= 0) {
+        toast.error(`Sản phẩm ${selectedProduct.name} đã hết hàng trong kho!`);
+        return;
+      }
+
+      handleItemChange(activeScanIndex, "productId", productId);
+      toast.success(`Đã chọn: ${selectedProduct.name}`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Lỗi quét mã");
+    }
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (isAccountant) {
+      toast.error("Tài khoản Kế toán không có quyền lập hoặc sửa phiếu!");
+      return;
+    }
     if (form.items.length === 0) {
       toast.error("Vui lòng thêm ít nhất một sản phẩm!");
       return;
@@ -245,24 +287,30 @@ export default function ExportReceipts() {
           <Button 
             variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-xl"
             onClick={() => handleEdit(r)}
-            title="Sửa"
+            title={isAccountant ? "Xem chi tiết" : "Sửa"}
           >
-             <FiFileText className="size-4" />
+             {isAccountant ? (
+               <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+             ) : (
+               <FiFileText className="size-4" />
+             )}
           </Button>
-          <Button 
-            variant="ghost" size="icon" className="text-error hover:bg-error/10 rounded-xl"
-            onClick={() => {
-              if (currentUser.role !== "admin") {
-                toast.warning("Chỉ Admin mới có quyền xóa!");
-                return;
-              }
-              setSelectedReceiptId(r.id);
-              setIsDeleteModalOpen(true);
-            }}
-            title="Xóa"
-          >
-             <FiTrash2 className="size-4" />
-          </Button>
+          {!isAccountant && (
+            <Button 
+              variant="ghost" size="icon" className="text-error hover:bg-error/10 rounded-xl"
+              onClick={() => {
+                if (currentUser.role !== "admin") {
+                  toast.warning("Chỉ Admin mới có quyền xóa!");
+                  return;
+                }
+                setSelectedReceiptId(r.id);
+                setIsDeleteModalOpen(true);
+              }}
+              title="Xóa"
+            >
+               <FiTrash2 className="size-4" />
+            </Button>
+          )}
         </div>
       )
     }
@@ -292,25 +340,27 @@ export default function ExportReceipts() {
               { key: "status", header: "Trang thai" },
             ]}
           />
-          <Button
-            onClick={() => {
-              setForm({ 
-                customerId: "", 
-                shipperId: "", 
-                export_date: new Date().toISOString().split("T")[0], 
-                status: "pending", 
-                note: "",
-                items: []
-              });
-              setIsEditing(false);
-              setShowModal(true);
-            }}
-            variant="primary"
-            className="rounded-xl shadow-primary/30 h-11 px-8"
-            leftIcon={<FiPlusCircle className="size-5" />}
-          >
-            Lập phiếu mới
-          </Button>
+          {!isAccountant && (
+            <Button
+              onClick={() => {
+                setForm({ 
+                  customerId: "", 
+                  shipperId: "", 
+                  export_date: new Date().toISOString().split("T")[0], 
+                  status: "pending", 
+                  note: "",
+                  items: []
+                });
+                setIsEditing(false);
+                setShowModal(true);
+              }}
+              variant="primary"
+              className="rounded-xl shadow-primary/30 h-11 px-8"
+              leftIcon={<FiPlusCircle className="size-5" />}
+            >
+              Lập phiếu mới
+            </Button>
+          )}
         </div>
       </div>
 
@@ -400,9 +450,11 @@ export default function ExportReceipts() {
         footer={
           <div className="flex justify-end gap-3 w-full">
             <Button variant="ghost" onClick={() => setShowModal(false)} className="h-11 px-6 rounded-xl">Đóng</Button>
-            <Button variant="primary" onClick={handleSubmit} className="h-11 px-10 shadow-primary/30 rounded-xl">
-              {isEditing ? "Cập nhật dữ liệu" : "Xác nhận xuất kho"}
-            </Button>
+            {!isAccountant && (
+              <Button variant="primary" onClick={handleSubmit} className="h-11 px-10 shadow-primary/30 rounded-xl">
+                {isEditing ? "Cập nhật dữ liệu" : "Xác nhận xuất kho"}
+              </Button>
+            )}
           </div>
         }
       >
@@ -424,7 +476,8 @@ export default function ExportReceipts() {
                   value={form.customerId}
                   onChange={handleChange}
                   required
-                  className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold"
+                  disabled={isAccountant}
+                  className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold disabled:opacity-60"
                 >
                   <option value="">-- Chọn khách hàng --</option>
                   {customers.map((c) => (
@@ -440,7 +493,8 @@ export default function ExportReceipts() {
                   name="shipperId"
                   value={form.shipperId}
                   onChange={handleChange}
-                  className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold"
+                  disabled={isAccountant}
+                  className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold disabled:opacity-60"
                 >
                   <option value="">-- Tự do / Chưa gán --</option>
                   {shippers.map((s) => (
@@ -455,6 +509,7 @@ export default function ExportReceipts() {
                 value={form.export_date}
                 onChange={handleChange}
                 required
+                disabled={isAccountant}
                 className="h-11"
                 leftIcon={<FiCalendar />}
               />
@@ -468,14 +523,16 @@ export default function ExportReceipts() {
                   <FiPackage className="size-4" />
                   <h4 className="text-[10px] font-black uppercase tracking-widest">Danh sách hàng hóa</h4>
                 </div>
-                <Button 
-                  type="button" variant="ghost" size="sm" 
-                  onClick={handleAddItem}
-                  className="text-primary hover:bg-primary/10 rounded-xl"
-                  leftIcon={<FiPlus />}
-                >
-                  Thêm mặt hàng
-                </Button>
+                 {!isAccountant && (
+                   <Button 
+                     type="button" variant="ghost" size="sm" 
+                     onClick={handleAddItem}
+                     className="text-primary hover:bg-primary/10 rounded-xl"
+                     leftIcon={<FiPlus />}
+                   >
+                     Thêm mặt hàng
+                   </Button>
+                 )}
              </div>
 
              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -484,11 +541,27 @@ export default function ExportReceipts() {
                   return (
                     <div key={index} className="flex flex-col md:flex-row gap-4 p-4 rounded-2xl bg-bg-subtle/20 dark:bg-white/[0.02] border border-border/40 dark:border-white/5 items-end animate-in fade-in slide-in-from-left-2">
                       <div className="flex-1 space-y-1.5 w-full">
-                        <label className="text-[9px] font-black text-text-tertiary uppercase ml-2 tracking-widest">Chọn sản phẩm</label>
+                        <label className="text-[9px] font-black text-text-tertiary uppercase ml-2 tracking-widest flex items-center justify-between">
+                          <span>Chọn sản phẩm</span>
+                          {!isAccountant && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveScanIndex(index);
+                                setIsScannerOpen(true);
+                              }}
+                              className="text-[9px] text-primary hover:text-primary/80 font-black tracking-widest uppercase hover:underline flex items-center gap-1 cursor-pointer"
+                              title="Quét mã QR chọn hàng"
+                            >
+                              <FiCamera className="size-3" /> Quét QR
+                            </button>
+                          )}
+                        </label>
                         <select
                           value={item.productId}
                           onChange={(e) => handleItemChange(index, "productId", e.target.value)}
-                          className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-10 px-4 outline-none font-bold"
+                          disabled={isAccountant}
+                          className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-xl h-10 px-4 outline-none font-bold disabled:opacity-60"
                         >
                           <option value="">-- Chọn sản phẩm trong kho --</option>
                           {stocks.map((s) => (
@@ -506,16 +579,19 @@ export default function ExportReceipts() {
                            max={selectedStock?.stock || 9999}
                            value={item.quantity}
                            onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                           disabled={isAccountant}
                            className="h-10"
                          />
                       </div>
-                      <Button 
-                        type="button" variant="ghost" size="icon" 
-                        onClick={() => handleRemoveItem(index)}
-                        className="text-error/60 hover:text-error hover:bg-error/10 mb-0.5 rounded-lg"
-                      >
-                         <FiTrash2 size={16} />
-                      </Button>
+                      {!isAccountant && (
+                        <Button 
+                          type="button" variant="ghost" size="icon" 
+                          onClick={() => handleRemoveItem(index)}
+                          className="text-error/60 hover:text-error hover:bg-error/10 mb-0.5 rounded-lg"
+                        >
+                           <FiTrash2 size={16} />
+                        </Button>
+                      )}
                     </div>
                   )
                 })}
@@ -537,7 +613,8 @@ export default function ExportReceipts() {
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold"
+                disabled={isAccountant}
+                className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl h-11 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold disabled:opacity-60"
               >
                 <option value="pending">Chờ xử lý (Lưu kho)</option>
                 <option value="shipping">Đang vận chuyển</option>
@@ -554,13 +631,20 @@ export default function ExportReceipts() {
                 placeholder="Lý do xuất, yêu cầu đặc biệt…"
                 value={form.note}
                 onChange={handleChange}
+                disabled={isAccountant}
                 rows="2"
-                className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl py-3 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold resize-none"
+                className="w-full bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 text-text-primary text-xs rounded-2xl py-3 px-4 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 font-bold resize-none disabled:opacity-60"
               />
             </div>
           </div>
         </form>
       </Modal>
+
+      <QRScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleScanSuccess}
+      />
     </div>
   );
 }

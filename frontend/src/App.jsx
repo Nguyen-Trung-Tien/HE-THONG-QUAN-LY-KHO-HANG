@@ -69,9 +69,13 @@ function App() {
 						<Route path='orders' element={<Orders />} />
 						<Route path='shippers' element={<Shippers />} />
 						
+						{/* Admin, Dev & Accountant routes */}
+						<Route element={<RoleGuard allowedRoles={['admin', 'dev', 'accountant']} />}>
+							<Route path="stats" element={<Statistics />} />
+						</Route>
+
 						{/* Admin & Dev only routes */}
 						<Route element={<RoleGuard allowedRoles={['admin', 'dev']} />}>
-							<Route path="stats" element={<Statistics />} />
 							<Route path='users' element={<Users />} />
 						</Route>
 

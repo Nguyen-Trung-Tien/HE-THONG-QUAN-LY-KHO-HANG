@@ -41,3 +41,13 @@ export const getExpiryAlerts = async (days = 30) => {
   const res = await axiosInstance.get(`/stock/expiry-alerts?days=${days}`);
   return res.data;
 };
+
+export const getReorderSuggestions = async () => {
+  const res = await axiosInstance.get(`/stock/reorder-suggestions`);
+  return res.data;
+};
+
+export const createReorderReceipt = async (data) => {
+  const res = await axiosInstance.post(`/stock/create-reorder-receipt`, data);
+  return res.data;
+};

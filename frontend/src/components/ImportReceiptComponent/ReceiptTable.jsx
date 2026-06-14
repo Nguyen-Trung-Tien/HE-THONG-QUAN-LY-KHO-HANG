@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import Table from "../common/Table";
 import Button from "../common/Button";
 import Badge from "../common/Badge";
@@ -10,6 +11,9 @@ export default function ReceiptTable({
   handleDelete,
   loading,
 }) {
+  const userRole = useSelector((state) => state.user.role || state.user.currentUser?.role);
+  const isAccountant = userRole === "accountant";
+
   const columns = [
     {
       title: 'Mã',
@@ -69,29 +73,38 @@ export default function ReceiptTable({
           <Button 
             variant="ghost" size="icon" className="text-primary hover:bg-primary/10"
             onClick={() => handleEdit(r)}
-            title="Chỉnh sửa"
+            title={isAccountant ? "Xem chi tiết" : "Chỉnh sửa"}
           >
-            <svg
-              className="size-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            {isAccountant ? (
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            ) : (
+              <svg
+                className="size-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            )}
+          </Button>
+          {!isAccountant && (
+            <Button 
+              variant="ghost" size="icon" className="text-error hover:bg-error/10"
+              onClick={() => handleDelete(r.id)}
+              title="Xóa"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
-          </Button>
-          <Button 
-            variant="ghost" size="icon" className="text-error hover:bg-error/10"
-            onClick={() => handleDelete(r.id)}
-            title="Xóa"
-          >
-            <FiTrash2 className="size-4" />
-          </Button>
+              <FiTrash2 className="size-4" />
+            </Button>
+          )}
         </div>
       )
     }

@@ -1,0 +1,43 @@
+services:
+  # Backend Node.js Service
+  - type: web
+    name: httt-quan-ly-kho-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    # Run migrations before starting the service
+    releaseCommand: npm run db:migrate:prod
+    startCommand: npm run start:prod
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+        description: "Comma-separated list of allowed frontend URLs (e.g. https://your-app.vercel.app)"
+      
+      # Database connection variables (Configured for TiDB Cloud)
+      - key: DB_PROD_DIALECT
+        value: mysql
+      - key: DB_PROD_HOST
+        sync: false
+        placeholder: "e.g. gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
+      - key: DB_PROD_PORT
+        value: "4000"
+      - key: DB_PROD_USERNAME
+        sync: false
+        placeholder: "e.g. oQ2wqkPLNZrFREe.root"
+      - key: DB_PROD_PASSWORD
+        sync: false
+        placeholder: "Your TiDB Cloud password"
+      - key: DB_PROD_NAME
+        sync: false
+        placeholder: "sys or custom database name"
+      - key: DB_PROD_SSL
+        value: "true"
+      - key: DB_PROD_SSL_REJECT_UNAUTHORIZED
+        value: "false"

@@ -8,7 +8,9 @@
   "main": "service.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/service.js"
+    "start": "nodemon src/service.js",
+    "start:prod": "node src/service.js",
+    "db:migrate:prod": "sequelize-cli db:migrate --env production"
   },
   "author": "GROUP 0",
   "license": "ISC",
@@ -29,9 +31,8 @@
     "qrcode": "^1.5.4",
     "sequelize": "^6.37.7",
     "speakeasy": "^2.0.0",
-    "ua-parser-js": "^2.0.10"
-  },
-  "devDependencies": {
+    "ua-parser-js": "^2.0.10",
     "sequelize-cli": "^6.6.3"
-  }
+  },
+  "devDependencies": {}
 }

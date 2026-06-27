@@ -103,17 +103,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
----
-
-## 📸 Ảnh chụp giao diện
-
-|      Sơ đồ kho Bento 2D         |               Biểu đồ Pareto ABC                   |       Đề xuất Đặt hàng          |
-| :-----------------------------: | :------------------------------------------------: | :-----------------------------: |
-| ![Map Grid](./public/home.png)  | ![ABC Analysis](./public/home.png)                 | ![Reorder](./public/archive.svg)|
-
----
-
 <div align="center">
   <p>Được thực hiện với ❤️ bởi Nhóm 6 — WMS Enterprise Solution 2026</p>
 </div>

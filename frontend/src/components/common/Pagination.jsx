@@ -48,25 +48,28 @@ const Pagination = ({
   const pages = paginationRange();
 
   return (
-    <div className={cn("flex items-center justify-center space-x-1 sm:space-x-1.5 mt-4", className)}>
+    <div className={cn("flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-6 w-full max-w-full px-1", className)}>
       <button
         onClick={(e) => {
           e.preventDefault();
           onPageChange(currentPage - 1);
         }}
         disabled={currentPage === 1}
-        className="p-1.5 sm:p-2 rounded-lg border border-border/60 dark:border-dark-border/40 bg-white dark:bg-dark-card text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white dark:disabled:hover:bg-dark-card disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90 shadow-sm"
+        className="px-3 py-2 sm:p-2 rounded-xl border border-border/60 dark:border-dark-border/40 bg-white dark:bg-dark-card text-text-secondary dark:text-dark-text-secondary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white dark:disabled:hover:bg-dark-card disabled:hover:text-text-tertiary transition-all duration-300 active:scale-95 shadow-sm text-xs font-bold flex items-center gap-1 touch-target"
+        aria-label="Trang trước"
       >
-        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
         </svg>
+        <span className="inline sm:hidden">Trước</span>
       </button>
 
-      <div className="flex items-center space-x-1">
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none px-1">
         {pages.map((page, index) => (
           <React.Fragment key={index}>
             {page === '...' ? (
-              <span className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-text-tertiary text-[10px] font-black">
+              <span className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-text-tertiary text-xs font-black">
                 •••
               </span>
             ) : (
@@ -76,10 +79,10 @@ const Pagination = ({
                   onPageChange(page);
                 }}
                 className={cn(
-                  "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] font-black transition-all duration-300 flex items-center justify-center uppercase tracking-tighter",
+                  "min-w-[32px] h-8 sm:w-8 sm:h-8 rounded-xl text-xs font-extrabold transition-all duration-200 flex items-center justify-center tracking-tight",
                   currentPage === page 
                     ? "bg-primary text-white shadow-md shadow-primary/30 scale-105 z-10" 
-                    : "bg-white dark:bg-dark-card border border-border/60 dark:border-dark-border/40 text-text-secondary hover:bg-primary/5 hover:text-primary active:scale-90 shadow-sm"
+                    : "bg-white dark:bg-dark-card border border-border/60 dark:border-dark-border/40 text-text-secondary dark:text-dark-text-secondary hover:bg-primary/5 hover:text-primary active:scale-95 shadow-sm"
                 )}
               >
                 {page}
@@ -95,10 +98,12 @@ const Pagination = ({
           onPageChange(currentPage + 1);
         }}
         disabled={currentPage === totalPages}
-        className="p-1.5 sm:p-2 rounded-lg border border-border/60 dark:border-dark-border/40 bg-white dark:bg-dark-card text-text-tertiary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white dark:disabled:hover:bg-dark-card disabled:hover:text-text-tertiary transition-all duration-300 active:scale-90 shadow-sm"
+        className="px-3 py-2 sm:p-2 rounded-xl border border-border/60 dark:border-dark-border/40 bg-white dark:bg-dark-card text-text-secondary dark:text-dark-text-secondary hover:bg-primary/5 hover:text-primary hover:border-primary/30 disabled:opacity-30 disabled:hover:bg-white dark:disabled:hover:bg-dark-card disabled:hover:text-text-tertiary transition-all duration-300 active:scale-95 shadow-sm text-xs font-bold flex items-center gap-1 touch-target"
+        aria-label="Trang sau"
       >
-        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
+        <span className="inline sm:hidden">Sau</span>
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
         </svg>
       </button>
     </div>

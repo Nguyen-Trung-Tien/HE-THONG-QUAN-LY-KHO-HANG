@@ -53,6 +53,7 @@ module.exports = {
         card: "0 2px 8px rgba(0, 0, 0, 0.05)",
         hover: "0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
         'soft-xl': '0 20px 27px 0 rgba(0, 0, 0, 0.05)',
+        'soft-2xl': '0 25px 35px 0 rgba(0, 0, 0, 0.08)',
       },
       keyframes: {
         float: {

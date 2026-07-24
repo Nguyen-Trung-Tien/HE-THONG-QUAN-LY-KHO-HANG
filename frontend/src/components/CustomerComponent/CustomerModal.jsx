@@ -35,12 +35,12 @@ export default function CustomerModal({
       title={isEditing ? "Cập nhật khách hàng" : "Thêm khách hàng mới"}
       size="md"
       footer={
-        <div className="flex justify-end gap-3 w-full">
-          <Button variant="ghost" onClick={onClose} className="h-11 px-6">Hủy</Button>
+        <div className="flex justify-end gap-2 w-full">
+          <Button variant="ghost" size="sm" onClick={onClose}>Hủy</Button>
           <Button 
             variant="primary" 
+            size="sm"
             onClick={() => onSubmit({ ...form })}
-            className="h-11 px-8 shadow-primary/30"
           >
             {isEditing ? "Lưu thay đổi" : "Thêm khách hàng"}
           </Button>

@@ -231,7 +231,6 @@ export default function UsersComponent() {
             setIsEditing(false);
             setIsModalOpen(true);
           }}
-          className="rounded-xl shadow-primary/30 h-11 px-6"
           leftIcon={<FiPlus />}
         >
           Thêm nhân viên
@@ -298,9 +297,9 @@ export default function UsersComponent() {
         title={isEditing ? "Cập nhật nhân viên" : "Thêm nhân viên mới"}
         size="md"
         footer={
-          <div className="flex justify-end gap-3 w-full">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6 rounded-xl">Hủy</Button>
-            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30 rounded-xl">
+          <div className="flex justify-end gap-2 w-full">
+            <Button variant="ghost" size="md" onClick={() => setIsModalOpen(false)}>Hủy</Button>
+            <Button variant="primary" size="md" onClick={handleSubmit}>
               {isEditing ? "Lưu thay đổi" : "Tạo tài khoản"}
             </Button>
           </div>

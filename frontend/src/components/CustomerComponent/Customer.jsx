@@ -202,10 +202,10 @@ function Customer() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
         <div>
           <Badge variant="primary" className="mb-1">Đối tác</Badge>
-          <h1 className="text-xl font-semibold text-text-primary tracking-tighter">
+          <h1 className="heading-1">
             Quản Lý Khách Hàng
           </h1>
-          <p className="text-[10px] text-text-secondary font-semibold">Cơ sở dữ liệu khách hàng và giao dịch</p>
+          <p className="subheading">Cơ sở dữ liệu khách hàng và giao dịch</p>
         </div>
         
         <div className="flex flex-wrap gap-2">

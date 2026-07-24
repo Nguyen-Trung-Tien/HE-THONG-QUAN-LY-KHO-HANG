@@ -118,10 +118,10 @@ const NotificationsPage = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <Badge variant="primary" className="mb-1">Hộp thư</Badge>
-          <h1 className="text-xl font-black text-text-primary tracking-tighter uppercase">
+          <h1 className="heading-1">
             Quản lý thông báo
           </h1>
-          <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider">Xem và quản lý các thông báo từ hệ thống</p>
+          <p className="subheading">Xem và quản lý các thông báo từ hệ thống</p>
         </div>
         <div className="flex items-center space-x-2 w-full sm:w-auto">
           <Button 

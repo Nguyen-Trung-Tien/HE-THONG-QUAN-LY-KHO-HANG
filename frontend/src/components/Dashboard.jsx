@@ -16,41 +16,70 @@ import {
 // Common Components
 import Card from './common/Card';
 import Badge from './common/Badge';
+import Button from './common/Button';
 import { cn } from '../utils/cn';
+import { FiPlus, FiBox, FiShoppingCart, FiUsers, FiTrendingUp, FiArrowUpRight, FiZap } from 'react-icons/fi';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const userRole = useSelector((state) => state.user.role);
   const isAdminOrDev = userRole === "admin" || userRole === "dev";
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <Badge variant="primary" className="mb-2">Smart WMS v3.0</Badge>
-          <h1 className="text-2xl font-black text-text-primary tracking-tighter uppercase">
-            Tổng quan
-          </h1>
-          <p className="text-xs text-text-secondary mt-1 font-semibold italic opacity-80">
-            Smart Warehouse Management System
-          </p>
-        </div>
-        <div className="flex items-center space-x-2 text-[10px] font-black text-text-secondary bg-white/70 dark:bg-dark-card/70 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-border/50 dark:border-dark-border/40 transition-all hover:scale-105">
-          <div className="w-6 h-6 bg-primary/10 rounded-lg flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" />
-            </svg>
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+      {/* Hero Header Section */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-2xl relative overflow-hidden border border-indigo-500/20">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 -mb-8 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="primary" className="bg-indigo-500/20 text-indigo-300 border-indigo-400/30">
+                <FiZap className="mr-1 text-emerald-400" /> Executive Dashboard
+              </Badge>
+              <span className="text-xs font-bold text-slate-400">V3.6 Pro</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white">
+              Hệ Thống Quản Lý Kho Thông Minh
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xl">
+              Theo dõi biến động tồn kho, báo cáo doanh thu thực tế và điều hành kho vận chính xác thời gian thực.
+            </p>
           </div>
-          <span className="tracking-tight uppercase">{new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button 
+              variant="gradient" 
+              size="sm"
+              leftIcon={<FiPlus />}
+              onClick={() => navigate('/WarehouseManagement')}
+            >
+              Nhập Hóa Đơn
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm"
+              leftIcon={<FiShoppingCart />}
+              onClick={() => navigate('/orders')}
+              className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+            >
+              Xem Đơn Hàng
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* Low Stock & Expiry Alerts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <LowStockAlert />
         <ExpiryAlert />
       </div>
 
+      {/* KPI Cards */}
       <DashboardCards />
       
+      {/* Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {isAdminOrDev && (
           <div className="lg:col-span-2">
@@ -62,6 +91,7 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Deadstock Report */}
       <div className="grid grid-cols-1 gap-6">
         <DeadstockReport />
       </div>
@@ -103,100 +133,84 @@ function DashboardCards() {
     isAdminOrDev && {
       title: "Tổng doanh thu",
       value: totalRevenue.toLocaleString("vi-VN") + "đ",
-      change: "12.5%",
+      change: "+12.5%",
       isPositive: true,
       variant: "primary",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      path: "/",
+      gradient: "from-sky-500 to-blue-600",
+      icon: <FiTrendingUp className="w-6 h-6 text-white" />,
+      path: "/stats",
     },
     {
       title: "Đơn hàng",
       value: allOrders,
-      change: "8.2%",
+      change: "+8.2%",
       isPositive: true,
       variant: "success",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      ),
+      gradient: "from-emerald-500 to-teal-600",
+      icon: <FiShoppingCart className="w-6 h-6 text-white" />,
       path: "/orders",
     },
     {
-      title: "Tồn kho",
+      title: "Tồn kho tổng",
       value: allStock,
-      change: "2.4%",
+      change: "-2.4%",
       isPositive: false,
       variant: "warning",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-      ),
+      gradient: "from-amber-500 to-orange-600",
+      icon: <FiBox className="w-6 h-6 text-white" />,
       path: "/inventory",
     },
     {
       title: "Khách hàng",
       value: allCustomers,
-      change: "15.3%",
+      change: "+15.3%",
       isPositive: true,
       variant: "accent",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      ),
+      gradient: "from-indigo-500 to-purple-600",
+      icon: <FiUsers className="w-6 h-6 text-white" />,
       path: "/customer",
     },
   ].filter(Boolean);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
       {stats.map((stat, index) => (
-        <Card
+        <div
           key={index}
           onClick={() => navigate(stat.path)}
-          className="group cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] active:scale-95"
+          className="group cursor-pointer relative rounded-2xl sm:rounded-3xl bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 p-5 sm:p-6 shadow-soft-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
         >
+          {/* Subtle Ambient Background Accent */}
           <div className={cn(
-            "absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl opacity-10 transition-all duration-700 group-hover:scale-150 group-hover:opacity-20",
-            stat.variant === 'primary' && "bg-primary",
-            stat.variant === 'success' && "bg-success",
-            stat.variant === 'warning' && "bg-warning",
-            stat.variant === 'accent' && "bg-accent",
-          )}></div>
-          
-          <div className="flex items-start justify-between mb-4 relative z-10">
+            "absolute top-0 right-0 w-32 h-32 bg-gradient-to-br rounded-full blur-3xl opacity-10 transition-opacity group-hover:opacity-25 pointer-events-none",
+            stat.gradient
+          )} />
+
+          <div className="flex items-center justify-between mb-4 relative z-10">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-500 group-hover:rotate-6 text-white scale-90",
-              stat.variant === 'primary' && "bg-primary shadow-primary/30",
-              stat.variant === 'success' && "bg-success shadow-success/30",
-              stat.variant === 'warning' && "bg-warning shadow-warning/30",
-              stat.variant === 'accent' && "bg-accent shadow-accent/30",
+              "w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
+              stat.gradient
             )}>
               {stat.icon}
             </div>
-            <Badge 
-              variant={stat.isPositive ? "success" : "error"} 
-              size="sm"
-            >
-              {stat.isPositive ? '+' : '-'}{stat.change}
-            </Badge>
+            
+            <div className="flex items-center gap-1 text-xs font-black">
+              <Badge variant={stat.isPositive ? "success" : "error"} size="sm">
+                {stat.change}
+              </Badge>
+              <FiArrowUpRight className="text-text-tertiary group-hover:text-primary transition-colors" />
+            </div>
           </div>
-          
-          <div className="relative z-10">
-            <h3 className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.15em] mb-1">
+
+          <div className="relative z-10 space-y-1">
+            <p className="text-xs font-extrabold text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-wider">
               {stat.title}
-            </h3>
-            <p className="text-xl font-black text-text-primary tracking-tighter truncate leading-none">
-              {stat.value}
             </p>
+            <h3 className="text-xl sm:text-2xl font-black text-text-primary dark:text-dark-text-primary tracking-tight truncate">
+              {stat.value}
+            </h3>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );

@@ -47,8 +47,8 @@ const NotificationDropdown = ({ isOpen, onClose, notifications, onMarkAsRead, on
 
   return (
     <>
-      <div className="fixed inset-0 z-40" onClick={() => { setViewingNoti(null); onClose(); }} />
-      <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl shadow-soft-2xl bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-300">
+      <div className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent backdrop-blur-[2px] sm:backdrop-blur-none" onClick={() => { setViewingNoti(null); onClose(); }} />
+      <div className="fixed sm:absolute inset-x-3 sm:inset-auto sm:right-0 top-16 sm:top-full mt-2 w-auto sm:w-96 rounded-2xl sm:rounded-3xl shadow-2xl bg-white dark:bg-dark-card border border-border/50 dark:border-dark-border/40 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
         {/* Header */}
         <div className="px-6 py-4 border-b border-border/50 dark:border-dark-border/40 bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.02] to-white dark:to-dark-card flex items-center justify-between">
           <div className="flex items-center space-x-2">

@@ -253,7 +253,7 @@ function Inventory() {
           {!isAccountant && (
             <Button 
               variant="primary" 
-              size="md"
+              size="sm"
               onClick={() => setIsCreateModalOpen(true)}
               leftIcon={<FiPlus />}
               className="rounded-xl shadow-primary/30"

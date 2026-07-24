@@ -66,30 +66,39 @@ function AuditLogs() {
       noPadding
     >
       <div className="p-0">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 opacity-30">
-            <FiRefreshCw className="animate-spin size-10 mb-4" />
-            <p className="text-xs font-black uppercase tracking-widest">Đang tải lịch sử hoạt động...</p>
-          </div>
-        ) : logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 opacity-30">
-            <FiActivity size={64} className="mb-4" />
-            <p className="text-xs font-black uppercase tracking-widest">Không có dữ liệu lịch sử</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="min-w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.01] to-white dark:to-dark-card">
-                  {["Thời gian", "Thao tác", "Mã SP", "Số lượng", "Người thực hiện", "Ghi chú"].map((h, i) => (
-                    <th key={i} className="px-8 py-5 text-[10px] font-black text-text-tertiary uppercase tracking-widest border-b border-border/30 dark:border-dark-border/40">
-                      {h}
-                    </th>
-                  ))}
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="min-w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gradient-to-r from-bg-subtle/50 dark:from-white/[0.01] to-white dark:to-dark-card">
+                {["Thời gian", "Thao tác", "Mã SP", "Số lượng", "Người thực hiện", "Ghi chú"].map((h, i) => (
+                  <th key={i} className="px-8 py-5 text-[10px] font-black text-text-tertiary uppercase tracking-widest border-b border-border/30 dark:border-dark-border/40">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/20 dark:divide-dark-border/40">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="animate-pulse">
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <td key={`cell-${j}`} className="px-8 py-6">
+                        <div className="h-3 bg-bg-subtle dark:bg-white/[0.03] rounded-full w-full opacity-50" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : logs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-8 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center gap-y-3 opacity-40">
+                      <FiActivity size={48} />
+                      <p className="text-xs font-black uppercase tracking-widest">Không có dữ liệu lịch sử</p>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20 dark:divide-dark-border/40">
-                {logs.map((log) => (
+              ) : (
+                logs.map((log) => (
                   <tr key={log.id} className="group hover:bg-primary/[0.02] dark:hover:bg-white/[0.01] transition-all duration-300">
                     <td className="px-8 py-6 whitespace-nowrap">
                        <div className="flex items-center space-x-2 text-text-tertiary">
@@ -127,11 +136,11 @@ function AuditLogs() {
                       </p>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </Card>
   );

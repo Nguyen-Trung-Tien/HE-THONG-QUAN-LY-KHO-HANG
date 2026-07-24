@@ -30,20 +30,21 @@
 }
 
     body {
-      font-family: 'Inter', sans-serif;
-      @apply bg-bg-light dark:bg-dark-bg text-text-primary;
-    }
+  font-family: 'Inter', sans-serif;
+  @apply bg-bg-light dark:bg-dark-bg text-text-primary antialiased selection:bg-primary/20 selection:text-primary;
+  -webkit-tap-highlight-color: transparent;
+}
 
 .heading-1 {
-  @apply text-xl sm:text-2xl font-black text-text-primary tracking-tighter uppercase leading-tight;
+  @apply text-lg sm:text-xl md:text-2xl font-black text-text-primary tracking-tighter uppercase leading-tight;
 }
 
 .heading-2 {
-  @apply text-lg sm:text-xl font-black text-text-primary tracking-tight uppercase leading-tight;
+  @apply text-base sm:text-lg md:text-xl font-black text-text-primary tracking-tight uppercase leading-tight;
 }
 
 .subheading {
-  @apply text-[10px] text-text-tertiary font-bold uppercase tracking-[0.2em] mt-1;
+  @apply text-xs sm:text-xs text-text-secondary font-semibold tracking-wide mt-0.5;
 }
 
 /* Global Element Styles */
@@ -65,21 +66,77 @@ select option {
 input:disabled, select:disabled, textarea:disabled {
   @apply opacity-50 cursor-not-allowed dark:bg-dark-bg/50;
 }
-.gradient-bg {  @apply bg-gradient-to-r from-primary to-primary-light;
+
+/* Brand Design Utilities */
+.gradient-bg {
+  @apply bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500;
+}
+
+.gradient-brand {
+  @apply bg-gradient-to-r from-sky-500 to-indigo-600;
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 bg-clip-text text-transparent;
+}
+
+.gradient-text-brand {
+  @apply bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent;
 }
 
 /* Global Transitions - Only for interactive elements to prevent flickering on load */
-a, button, input, select, textarea, .transition-all {
+a, button, input, select, textarea {
   @apply transition-colors duration-200;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+/* Minimum touch target for touch screens */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Global Custom Scrollbars & Hide ugly native browser arrows */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Firefox standard scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -90,32 +147,43 @@ a, button, input, select, textarea, .transition-all {
   @apply bg-text-tertiary/20 rounded-full hover:bg-text-tertiary/40 dark:bg-white/10 dark:hover:bg-white/20 transition-colors;
 }
 
+/* Utility to completely hide scrollbars visually while keeping touch/scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Animation Utilities */
 .shake {
   animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 @keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
-  }
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism & Neon Glow Utilities */
 .glass {
   @apply bg-white/70 dark:bg-dark-card/60 backdrop-blur-xl border border-white/40 dark:border-dark-border/30 shadow-soft-xl dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+}
+
+.glass-card {
+  @apply bg-white/80 dark:bg-dark-card/80 backdrop-blur-2xl border border-white/60 dark:border-dark-border/40 shadow-2xl transition-all duration-300 hover:border-primary/40;
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px -5px rgba(56, 189, 248, 0.4);
+}
+
+.glow-success {
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.4);
 }

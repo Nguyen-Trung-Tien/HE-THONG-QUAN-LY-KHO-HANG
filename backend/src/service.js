@@ -42,6 +42,23 @@ app.use(express.static("public"));
 
 routes(app);
 
+// 404 Handler
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: "ERR",
+    message: `API Route không tồn tại: ${req.originalUrl}`,
+  });
+});
+
+// Centralized Error Handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled API Error:", err);
+  res.status(err.status || 500).json({
+    status: "ERR",
+    message: err.message || "Lỗi hệ thống nội bộ backend",
+  });
+});
+
 connectDB();
 
 const port = process.env.PORT || 8080;

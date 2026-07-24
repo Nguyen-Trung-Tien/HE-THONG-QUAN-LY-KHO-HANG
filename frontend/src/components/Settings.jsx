@@ -80,6 +80,11 @@ const Settings = () => {
   }, [activeTab]);
 
   useEffect(() => {
+    const currentTheme = currentUser?.preferredTheme || localStorage.getItem("theme") || "light";
+    setSettings((prev) => (prev.theme !== currentTheme ? { ...prev, theme: currentTheme } : prev));
+  }, [currentUser?.preferredTheme]);
+
+  useEffect(() => {
     // Apply theme on component load or setting change
     if (settings.theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -87,6 +92,21 @@ const Settings = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [settings.theme]);
+
+  const handleThemeChange = (newTheme) => {
+    setSettings((prev) => ({ ...prev, theme: newTheme }));
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem("theme", newTheme);
+    if (currentUser) {
+      const updatedUser = { ...currentUser, preferredTheme: newTheme };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      dispatch(login(updatedUser));
+    }
+  };
 
   const checkDBConnection = async () => {
     setDbStatus(prev => ({ ...prev, loading: true }));
@@ -299,10 +319,10 @@ const Settings = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <Badge variant="primary" className="mb-1">Hệ thống</Badge>
-          <h1 className="text-xl font-black text-text-primary tracking-tighter uppercase leading-none">
+          <h1 className="heading-1">
             Cài đặt
           </h1>
-          <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider mt-1 opacity-80">
+          <p className="subheading">
             Smart Warehouse Management System
           </p>
         </div>
@@ -364,7 +384,7 @@ const Settings = () => {
                     </label>
                     <div className="grid grid-cols-2 gap-4">
                        <button 
-                        onClick={() => setSettings({...settings, theme: 'light'})}
+                        onClick={() => handleThemeChange('light')}
                         className={cn(
                           "flex items-center justify-center space-x-2.5 p-4 rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden",
                           settings.theme === 'light' 
@@ -377,7 +397,7 @@ const Settings = () => {
                           {settings.theme === 'light' && <div className="absolute top-2 right-2 size-1.5 bg-primary rounded-full animate-pulse" />}
                        </button>
                        <button 
-                        onClick={() => setSettings({...settings, theme: 'dark'})}
+                        onClick={() => handleThemeChange('dark')}
                         className={cn(
                           "flex items-center justify-center space-x-2.5 p-4 rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden",
                           settings.theme === 'dark' 

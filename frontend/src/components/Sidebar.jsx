@@ -207,47 +207,60 @@ function Sidebar({ onClose }) {
   ].filter(Boolean);
 
   return (
-    <div className="flex flex-col size-full py-5 bg-gradient-to-b from-white dark:from-dark-card to-bg-subtle/20 dark:to-dark-bg/20">
-      <div className="px-5 mb-6 flex items-center gap-x-2">
-        <div className="w-1 h-3.5 bg-primary rounded-full" />
-        <h2 className="text-[9px] font-semibold text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.2em]">
-          Danh mục
-        </h2>
+    <div className="flex flex-col size-full py-4 sm:py-5 bg-gradient-to-b from-white dark:from-dark-card to-bg-subtle/20 dark:to-dark-bg/20">
+      {/* Sidebar Header with Mobile Close button */}
+      <div className="px-4 sm:px-5 mb-4 sm:mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-x-2">
+          <div className="w-1.5 h-4 bg-primary rounded-full" />
+          <h2 className="text-xs font-bold text-text-tertiary dark:text-dark-text-tertiary uppercase tracking-[0.15em]">
+            Danh mục
+          </h2>
+        </div>
+        <button
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg text-text-tertiary hover:text-error hover:bg-error/10 transition-colors"
+          aria-label="Close sidebar"
+        >
+          <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <nav className="flex-1 px-3 flex flex-col gap-y-1 overflow-y-auto custom-scrollbar scroll-smooth">
+
+      <nav className="flex-1 px-3 flex flex-col gap-y-1 sm:gap-y-0.5 overflow-y-auto no-scrollbar scroll-smooth">
         {menuItems.map((item) => (
           <NavLink
             key={item.id}
             to={item.path}
             onClick={() => window.innerWidth < 1024 && onClose?.()}
             className={({ isActive }) =>
-              `flex items-center px-3.5 py-2.5 text-[11px] font-black rounded-xl transition-all duration-300 group relative ${
+              `flex items-center px-3.5 py-2.5 sm:py-2 text-xs font-extrabold rounded-xl transition-all duration-300 group relative ${
                 isActive
-                  ? "bg-primary text-white shadow-lg shadow-primary/30 scale-[1.02] z-10 active"
-                  : "text-text-tertiary hover:bg-white dark:hover:bg-dark-card hover:text-primary hover:shadow-sm hover:translate-x-0.5"
+                  ? "bg-primary text-white shadow-lg shadow-primary/30 scale-[1.01] sm:scale-[1.02] z-10 active"
+                  : "text-text-secondary dark:text-dark-text-secondary hover:bg-white dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary hover:shadow-sm hover:translate-x-0.5"
               }`
             }
           >
-            <span className="mr-3 transition-all duration-300 group-hover:scale-110 scale-90">
+            <span className="mr-3 transition-all duration-300 group-hover:scale-110 scale-100 sm:scale-90">
               {item.icon}
             </span>
             <span className="tracking-tight uppercase">{item.name}</span>
             {/* Active Indicator Dot */}
-            <div className="absolute right-3 size-1 rounded-full bg-white opacity-0 transition-opacity duration-300 group-[.active]:opacity-100 shadow-sm" />
+            <div className="absolute right-3 size-1.5 rounded-full bg-white opacity-0 transition-opacity duration-300 group-[.active]:opacity-100 shadow-sm" />
           </NavLink>
         ))}
       </nav>
 
-      <div className="mt-auto px-3 pt-5 border-t border-border/40 dark:border-dark-border/40">
-        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-4 border border-border/50 dark:border-dark-border/40 relative overflow-hidden group hover:shadow-md transition-all duration-500">
-          <p className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mb-1 relative z-10 truncate">
+      <div className="mt-auto px-3 pt-4 border-t border-border/40 dark:border-dark-border/40">
+        <div className="bg-white/50 dark:bg-dark-card/50 backdrop-blur-sm rounded-2xl p-3.5 border border-border/50 dark:border-dark-border/40 relative overflow-hidden group hover:shadow-md transition-all duration-500">
+          <p className="text-xs font-black text-primary uppercase tracking-wider mb-1 relative z-10 truncate">
             {currentUser?.systemName || "Smart WMS"}
           </p>
           <div className="flex items-center justify-between relative z-10">
-            <span className="text-[9px] font-black text-text-tertiary dark:text-dark-text-tertiary tracking-widest">
+            <span className="text-[10px] font-extrabold text-text-tertiary dark:text-dark-text-tertiary tracking-widest">
               V3.6.0
             </span>
-            <div className="size-1.5 rounded-full bg-success animate-pulse shadow-sm shadow-success/20"></div>
+            <div className="size-2 rounded-full bg-success animate-pulse shadow-sm shadow-success/20"></div>
           </div>
         </div>
       </div>

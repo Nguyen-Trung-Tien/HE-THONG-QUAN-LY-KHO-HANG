@@ -20,40 +20,47 @@ const ExportExcel = ({
   columns = [] 
 }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleExport = (exportData, suffix = "") => {
     if (!exportData || exportData.length === 0) return;
+    setLoading(true);
 
-    // Map data to custom headers if columns are provided
-    const mappedData = exportData.map((item) => {
-      if (columns.length > 0) {
-        const mappedItem = {};
-        columns.forEach((col) => {
-          // Handle nested objects if necessary (e.g., 'userData.email')
-          const value = col.key.split('.').reduce((obj, key) => obj?.[key], item);
-          mappedItem[col.header] = value || "";
-        });
-        return mappedItem;
-      }
-      return item;
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(mappedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    
-    // Auto-size columns
-    const maxWidths = {};
-    mappedData.forEach(row => {
-      Object.keys(row).forEach((key) => {
-        const val = row[key] ? row[key].toString() : "";
-        maxWidths[key] = Math.max(maxWidths[key] || 10, val.length + 2);
+    try {
+      // Map data to custom headers if columns are provided
+      const mappedData = exportData.map((item) => {
+        if (columns.length > 0) {
+          const mappedItem = {};
+          columns.forEach((col) => {
+            const value = col.key.split('.').reduce((obj, key) => obj?.[key], item);
+            mappedItem[col.header] = value || "";
+          });
+          return mappedItem;
+        }
+        return item;
       });
-    });
-    worksheet["!cols"] = Object.values(maxWidths).map(w => ({ wch: w }));
 
-    XLSX.writeFile(workbook, `${fileName}${suffix}.xlsx`);
-    setShowOptions(false);
+      const worksheet = XLSX.utils.json_to_sheet(mappedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      
+      // Auto-size columns
+      const maxWidths = {};
+      mappedData.forEach(row => {
+        Object.keys(row).forEach((key) => {
+          const val = row[key] ? row[key].toString() : "";
+          maxWidths[key] = Math.max(maxWidths[key] || 10, val.length + 2);
+        });
+      });
+      worksheet["!cols"] = Object.values(maxWidths).map(w => ({ wch: w }));
+
+      XLSX.writeFile(workbook, `${fileName}${suffix}.xlsx`);
+    } catch (err) {
+      console.error("Excel Export error:", err);
+    } finally {
+      setLoading(false);
+      setShowOptions(false);
+    }
   };
 
   return (
@@ -64,6 +71,7 @@ const ExportExcel = ({
           size="md"
           onClick={() => handleExport(data)}
           leftIcon={<FiDownload className="stroke-[3px]" />}
+          isLoading={loading}
           className="bg-white dark:bg-dark-card hover:bg-success/5 dark:hover:bg-success/10 hover:text-success hover:border-success/30 rounded-l-xl border-r-0 h-10 px-4 transition-all"
         >
           Xuất Excel

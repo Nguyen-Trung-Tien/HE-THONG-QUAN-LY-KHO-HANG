@@ -82,11 +82,25 @@ const handleLoginUser = async (email, password) => {
 const createNewUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
+      if (!data.email || !data.password) {
+        return resolve({
+          errCode: 1,
+          errMessage: "Vui lòng nhập đầy đủ Email và Mật khẩu!",
+        });
+      }
+
+      if (data.password.length < 6) {
+        return resolve({
+          errCode: 1,
+          errMessage: "Mật khẩu phải có ít nhất 6 ký tự!",
+        });
+      }
+
       let emailExists = await checkUserEmail(data.email);
       if (emailExists) {
         return resolve({
           errCode: 1,
-          errMessage: "Your Email is already in use! Please try another email!",
+          errMessage: "Email này đã được sử dụng! Vui lòng chọn Email khác.",
         });
       }
 
@@ -118,12 +132,12 @@ const getAllUsers = (userId) => {
       let users;
       if (userId === "All" || !userId) {
         users = await db.User.findAll({
-          attributes: { exclude: ["password"] },
+          attributes: { exclude: ["password", "securityPin", "twoFactorSecret"] },
         });
       } else {
         users = await db.User.findAll({
           where: { id: userId },
-          attributes: { exclude: ["password"] },
+          attributes: { exclude: ["password", "securityPin", "twoFactorSecret"] },
         });
       }
       resolve(users);
@@ -213,6 +227,13 @@ const changePassword = async (data) => {
       return {
         errCode: 1,
         errMessage: "Thiếu tham số bắt buộc!",
+      };
+    }
+
+    if (data.newPassword.length < 6) {
+      return {
+        errCode: 1,
+        errMessage: "Mật khẩu mới phải có ít nhất 6 ký tự!",
       };
     }
 

@@ -6,6 +6,7 @@ const Button = ({
   variant = 'primary', 
   size = 'md', 
   isLoading = false,
+  loadingText,
   leftIcon,
   rightIcon,
   children,
@@ -14,22 +15,23 @@ const Button = ({
   ...props 
 }) => {
   const variants = {
-    primary: 'bg-primary text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0',
-    secondary: 'bg-white dark:bg-dark-card text-text-primary border border-border/60 dark:border-dark-border/60 hover:bg-bg-subtle dark:hover:bg-white/5 shadow-sm active:scale-95',
-    outline: 'bg-transparent text-primary border-2 border-primary/20 hover:border-primary hover:bg-primary/5 active:scale-95',
-    ghost: 'bg-transparent text-text-secondary hover:bg-bg-subtle dark:hover:bg-white/5 hover:text-text-primary active:scale-95',
-    danger: 'bg-error text-white shadow-xl shadow-error/20 hover:shadow-error/40 hover:-translate-y-0.5 active:translate-y-0',
-    success: 'bg-success text-white shadow-xl shadow-success/20 hover:shadow-success/40 hover:-translate-y-0.5 active:translate-y-0',
-    info: 'bg-info text-white shadow-xl shadow-info/20 hover:shadow-info/40 hover:-translate-y-0.5 active:translate-y-0',
+    primary: 'gradient-brand text-white shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:-translate-y-0.5 active:scale-[0.98]',
+    gradient: 'gradient-brand text-white shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:-translate-y-0.5 active:scale-[0.98]',
+    secondary: 'bg-bg-subtle/80 dark:bg-white/5 text-text-secondary dark:text-dark-text-secondary hover:text-text-primary dark:hover:text-white border border-border/60 dark:border-dark-border/40 hover:bg-white dark:hover:bg-white/10 active:scale-[0.98]',
+    outline: 'bg-transparent text-primary border border-primary/40 hover:border-primary hover:bg-primary/10 active:scale-[0.98]',
+    ghost: 'bg-transparent text-text-secondary hover:bg-bg-subtle dark:hover:bg-white/5 hover:text-text-primary active:scale-[0.98]',
+    danger: 'bg-error text-white shadow-md shadow-error/20 hover:shadow-error/35 hover:-translate-y-0.5 active:scale-[0.98]',
+    success: 'bg-success text-white shadow-md shadow-success/20 hover:shadow-success/35 hover:-translate-y-0.5 active:scale-[0.98]',
+    info: 'bg-info text-white shadow-md shadow-info/20 hover:shadow-info/35 hover:-translate-y-0.5 active:scale-[0.98]',
   };
 
   const sizes = {
-    xs: 'px-3 py-1 text-[10px] font-black rounded-lg',
-    sm: 'px-4 py-1.5 text-xs font-black rounded-xl',
-    md: 'px-6 py-2.5 text-xs font-black rounded-[1rem]',
-    lg: 'px-8 py-3.5 text-sm font-black rounded-[1.25rem]',
-    xl: 'px-10 py-4 text-base font-black rounded-[1.5rem]',
-    icon: 'p-2.5 rounded-xl',
+    xs: 'h-7 px-2.5 text-[11px] font-bold rounded-xl gap-1.5',
+    sm: 'h-9 px-4 text-xs font-bold rounded-xl gap-2',
+    md: 'h-9 px-4 text-xs font-bold rounded-xl gap-2',
+    lg: 'h-9.5 px-4.5 text-xs font-bold rounded-xl gap-2.5',
+    xl: 'h-10.5 px-5 text-sm font-extrabold rounded-xl gap-3',
+    icon: 'size-9 p-0 flex items-center justify-center rounded-xl',
   };
 
   return (
@@ -37,24 +39,34 @@ const Button = ({
       ref={ref}
       disabled={disabled || isLoading}
       className={cn(
-        'inline-flex items-center justify-center transition-all duration-300 outline-none focus:ring-4 focus:ring-current/10 uppercase tracking-tighter disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none disabled:cursor-not-allowed',
+        'relative inline-flex items-center justify-center font-bold tracking-tight text-center transition-all duration-200 outline-none focus:ring-4 focus:ring-primary/15 disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none disabled:cursor-not-allowed overflow-hidden group select-none',
         variants[variant],
         sizes[size],
         className
       )}
       {...props}
     >
+      {/* Subtle shine highlight on hover */}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+
       {isLoading ? (
-        <svg className="animate-spin -ml-1 mr-2.5 size-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      ) : leftIcon ? (
-        <span className="mr-2.5 transition-transform group-hover:-translate-x-0.5">{leftIcon}</span>
-      ) : null}
-      <span className="relative z-10">{children}</span>
-      {!isLoading && rightIcon && (
-        <span className="ml-2.5 transition-transform group-hover:translate-x-0.5">{rightIcon}</span>
+        <span className="inline-flex items-center gap-2 relative z-10">
+          <span className="relative size-3.5 flex items-center justify-center">
+            <span className="absolute inset-0 rounded-full border-2 border-current opacity-20" />
+            <span className="absolute inset-0 rounded-full border-2 border-current border-t-transparent animate-spin" />
+          </span>
+          <span className="tracking-tight">{loadingText || children}</span>
+        </span>
+      ) : (
+        <>
+          {leftIcon && (
+            <span className="transition-transform duration-300 group-hover:-translate-x-0.5 relative z-10 flex items-center justify-center">{leftIcon}</span>
+          )}
+          <span className="relative z-10 whitespace-nowrap">{children}</span>
+          {rightIcon && (
+            <span className="transition-transform duration-300 group-hover:translate-x-0.5 relative z-10 flex items-center justify-center">{rightIcon}</span>
+          )}
+        </>
       )}
     </button>
   );

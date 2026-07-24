@@ -18,6 +18,7 @@ import ConfirmModal from "../common/ConfirmModal";
 import ExportExcel from "../common/ExportExcel";
 import ExportPDF from "../common/ExportPDF";
 import { cn } from "../../utils/cn";
+import { FiPlus, FiSearch, FiEye, FiEdit3, FiTrash2, FiPackage } from "react-icons/fi";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -78,46 +79,49 @@ const ProductList = () => {
     {
       title: "STT",
       key: "index",
-      render: (_, __, index) => (page - 1) * 10 + index + 1,
-      className: "w-12 text-center text-[11px]",
+      render: (_, __, index) => <span className="font-extrabold text-text-tertiary">#{(page - 1) * 10 + index + 1}</span>,
     },
     {
       title: "Sản phẩm",
       key: "name",
       render: (name, row) => (
-        <div className="flex items-center gap-x-2">
-          <div className="size-8 rounded-lg bg-bg-subtle dark:bg-white/5 overflow-hidden flex-shrink-0 border border-border/50 dark:border-white/10 shadow-sm">
+        <div className="flex items-center space-x-3">
+          <div className="size-10 rounded-xl bg-bg-subtle dark:bg-white/5 border border-border/50 dark:border-dark-border/40 p-1 flex items-center justify-center flex-shrink-0">
             {row.image ? (
-              <img src={row.image} alt={name} className="size-full object-cover" />
+              <img src={row.image} alt={name} className="size-full object-cover rounded-lg" />
             ) : (
-              <div className="size-full flex items-center justify-center text-text-tertiary scale-75">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
+              <FiPackage className="text-primary size-5" />
             )}
           </div>
-          <span className="font-bold text-text-primary text-[11px] tracking-tight truncate max-w-[150px] uppercase">{name}</span>
+          <div>
+            <p className="font-black text-text-primary dark:text-dark-text-primary text-xs sm:text-sm">{name}</p>
+            <p className="text-[10px] font-bold text-text-tertiary uppercase">{row.category || 'Mặc định'}</p>
+          </div>
         </div>
       ),
     },
     {
-      title: "Danh mục",
-      key: "category",
-      className: "text-[11px] text-text-secondary uppercase font-semibold",
-    },
-    {
-      title: "Giá",
+      title: "Giá bán",
       key: "price",
-      render: (price) => <span className="font-black text-primary text-[11px]">{Number(price).toLocaleString()} đ</span>,
+      render: (price) => (
+        <span className="font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
+          {Number(price || 0).toLocaleString("vi-VN")}đ
+        </span>
+      ),
     },
     {
       title: "Tồn kho",
       key: "stock",
       render: (stock, row) => (
-        <span className={cn("text-[11px] font-bold", stock < 10 ? "text-error font-black" : "text-text-primary")}>
-          {stock} <span className="text-[10px] text-text-tertiary font-medium">{row.unit}</span>
-        </span>
+        <div className="flex items-center space-x-1.5">
+          <span className={cn(
+            "font-extrabold text-xs sm:text-sm",
+            stock > 10 ? "text-text-primary dark:text-dark-text-primary" : "text-amber-500"
+          )}>
+            {stock}
+          </span>
+          <span className="text-[10px] font-bold text-text-tertiary uppercase">{row.unit || 'Cái'}</span>
+        </div>
       ),
     },
     {
@@ -125,51 +129,43 @@ const ProductList = () => {
       key: "status",
       render: (status) => (
         <Badge variant={status === "Còn hàng" ? "success" : "error"} size="sm">
-          {status}
+          {status || 'Còn hàng'}
         </Badge>
       ),
     },
     {
-      title: "Hành động",
+      title: "Thao tác",
       key: "actions",
-      className: "text-right",
       render: (_, product) => (
-        <div className="flex justify-end gap-x-0.5 scale-90 origin-right">
+        <div className="flex items-center space-x-1 justify-end">
           <Button
             variant="ghost"
             size="icon"
-            className="text-info hover:bg-info/10"
+            className="text-info hover:bg-info/10 touch-target"
             onClick={() => { setSelectedProduct(product); setIsDetailModalOpen(true); }}
             title="Xem chi tiết"
           >
-            <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
+            <FiEye className="size-4" />
           </Button>
           {isAdminOrDev && (
             <>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-primary hover:bg-primary/10"
+                className="text-primary hover:bg-primary/10 touch-target"
                 onClick={() => { setSelectedProduct(product); setIsEditModalOpen(true); }}
                 title="Chỉnh sửa"
               >
-                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
+                <FiEdit3 className="size-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-error hover:bg-error/10"
+                className="text-error hover:bg-error/10 touch-target"
                 onClick={() => { setSelectedProduct(product); setIsDeleteModalOpen(true); }}
                 title="Xóa"
               >
-                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <FiTrash2 className="size-4" />
               </Button>
             </>
           )}
@@ -179,16 +175,20 @@ const ProductList = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
+    <div className="flex flex-col gap-y-5 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-dark-card p-6 sm:p-7 rounded-2xl sm:rounded-3xl border border-border/50 dark:border-dark-border/40 shadow-soft-xl">
         <div>
-          <Badge variant="primary" className="mb-1 uppercase tracking-widest">Tồn kho</Badge>
-          <h1 className="heading-1">
-            Sản phẩm
+          <Badge variant="primary" className="mb-2">Hệ Thống Kho Hàng</Badge>
+          <h1 className="text-xl sm:text-2xl font-black text-text-primary dark:text-dark-text-primary tracking-tight">
+            Quản Lý Sản Phẩm
           </h1>
-          <p className="subheading">Quản lý danh mục hàng hóa hệ thống</p>
+          <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mt-0.5">
+            Danh mục và trạng thái tồn kho hàng hóa thực tế
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2 scale-90 sm:scale-100 origin-right relative z-50">
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <ExportPDF
             data={products}
             fileName="Danh_sach_san_pham"
@@ -223,7 +223,7 @@ const ProductList = () => {
               variant="primary"
               size="md"
               onClick={() => setIsCreateModalOpen(true)}
-              leftIcon={<svg className="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>}
+              leftIcon={<FiPlus className="size-4" />}
             >
               Thêm mới
             </Button>
@@ -231,34 +231,34 @@ const ProductList = () => {
         </div>
       </div>
 
-      <Card className="shadow-soft-xl border-border/50 dark:border-dark-border/40" noPadding>
-        <div className="p-4 flex flex-col md:flex-row items-center gap-3 justify-between border-b border-border/40 dark:border-dark-border/40">
-          <div className="flex bg-bg-subtle dark:bg-white/5 p-0.5 rounded-lg w-full md:w-auto border border-border/50 dark:border-dark-border/60">
+      <Card className="shadow-soft-2xl border-border/50 dark:border-dark-border/40" noPadding>
+        <div className="p-4 sm:p-5 flex flex-col md:flex-row items-center gap-3 justify-between border-b border-border/40 dark:border-dark-border/40 bg-gradient-to-r from-bg-subtle/20 dark:from-white/[0.01] to-transparent">
+          <div className="flex bg-bg-subtle dark:bg-white/5 p-1 rounded-xl w-full md:w-auto border border-border/50 dark:border-dark-border/60">
             {["Tất cả", "Còn hàng", "Hết hàng"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
                 className={cn(
-                  "flex-1 md:flex-none px-4 py-1 text-[10px] font-black rounded-md transition-all duration-300 uppercase tracking-tighter",
-                  filter === tab ? "bg-white dark:bg-dark-card text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"
+                  "flex-1 md:flex-none px-4 py-2 text-xs font-extrabold rounded-lg transition-all duration-200 uppercase tracking-tight touch-target flex items-center justify-center",
+                  filter === tab ? "bg-white dark:bg-dark-card text-primary shadow-sm" : "text-text-secondary dark:text-dark-text-secondary hover:text-text-primary"
                 )}
               >
                 {tab}
               </button>
             ))}
           </div>
-          <div className="w-full md:w-64">
+
+          <div className="w-full md:w-72">
             <Input
               onChange={(e) => setSearch(e.target.value)}
               value={search}
-              placeholder="Tìm sản phẩm…"
-              className="h-9 text-[11px]"
-              leftIcon={<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>}
+              placeholder="Tìm theo tên sản phẩm…"
+              leftIcon={<FiSearch className="size-4" />}
             />
           </div>
         </div>
 
-        <div className="overflow-hidden">
+        <div className="overflow-hidden p-2 sm:p-4">
           <Table columns={columns} data={filteredProducts} loading={loading} />
         </div>
 
@@ -281,7 +281,7 @@ const ProductList = () => {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
         title="Xác nhận xóa"
-        message={`Xóa sản phẩm "${selectedProduct?.name}"?`}
+        message={`Bạn có chắc chắn muốn xóa sản phẩm "${selectedProduct?.name}"?`}
       />
     </div>
   );

@@ -101,10 +101,10 @@ function Shippers() {
     <div className='space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500'>
       <div>
         <Badge variant="primary" className="mb-1">Vận chuyển</Badge>
-        <h1 className='text-xl font-black text-text-primary tracking-tighter'>
+        <h1 className='heading-1'>
           Quản lý shipper
         </h1>
-        <p className="text-[10px] text-text-secondary font-semibold">Đội ngũ giao hàng và vị trí trực tuyến</p>
+        <p className="subheading">Đội ngũ giao hàng và vị trí trực tuyến</p>
       </div>
 
       <div className="flex justify-end gap-2">

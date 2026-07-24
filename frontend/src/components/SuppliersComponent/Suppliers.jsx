@@ -212,14 +212,14 @@ function SuppliersPage() {
           />
           <Button 
             variant="primary" 
-            size="md"
+            size="sm"
             onClick={() => {
               setForm({ name: "", phoneNumber: "", address: "", description: "" });
               setIsEditing(false);
               setIsModalOpen(true);
             }}
             leftIcon={<FiPlus className="size-4" />}
-            className="rounded-xl shadow-primary/30 h-10 px-6"
+            className="rounded-xl shadow-primary/30"
           >
             Thêm đối tác
           </Button>
@@ -271,10 +271,10 @@ function SuppliersPage() {
         title={isEditing ? "Cập nhật đối tác" : "Thêm đối tác cung ứng"}
         size="md"
         footer={
-          <div className="flex justify-end gap-3 w-full">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="h-11 px-6 rounded-xl">Hủy</Button>
-            <Button variant="primary" onClick={handleSubmit} className="h-11 px-8 shadow-primary/30 rounded-xl">
-              {isEditing ? "Lưu thay đổi" : "Kích hoạt đối tác"}
+          <div className="flex justify-end gap-2 w-full">
+            <Button variant="ghost" size="sm" onClick={() => setIsModalOpen(false)}>Hủy</Button>
+            <Button variant="primary" size="sm" onClick={handleSubmit}>
+              {isEditing ? "Lưu thay đổi" : "Tạo nhà cung cấp"}
             </Button>
           </div>
         }

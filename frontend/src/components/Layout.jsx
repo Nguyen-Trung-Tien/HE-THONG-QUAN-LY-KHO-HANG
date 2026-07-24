@@ -28,8 +28,8 @@ const Layout = () => {
           <Sidebar onClose={() => setIsSidebarOpen(false)} />
         </aside>
 
-        <main className="flex-1 overflow-y-auto relative z-10 p-4 sm:p-6 md:p-10 custom-scrollbar bg-transparent">
-          <div className="max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <main className="flex-1 overflow-y-auto relative z-10 p-3 sm:p-6 md:p-8 custom-scrollbar bg-transparent">
+          <div className="max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-3 duration-500">
             <Outlet />
           </div>
         </main>

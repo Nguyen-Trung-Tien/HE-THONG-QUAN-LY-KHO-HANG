@@ -10,7 +10,8 @@ import axiosInstance from "../API/utils/axiosInstance";
 import Button from "./common/Button";
 import Input from "./common/Input";
 import Modal from "./common/Modal";
-import { FiShield, FiArrowLeft, FiLock } from "react-icons/fi";
+import Badge from "./common/Badge";
+import { FiShield, FiLock, FiMail, FiBox, FiArrowRight } from "react-icons/fi";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -20,7 +21,6 @@ const SignIn = () => {
   const [needs2FA, setNeeds2FA] = useState(false);
   const [needsPIN, setNeedsPIN] = useState(false);
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -99,18 +99,19 @@ const SignIn = () => {
         token: otp,
       });
 
-      if (res.data.success) {
+      if (res.data.errCode === 0) {
         const userData = {
           ...res.data.user,
           access_token: res.data.access_token,
         };
+
         localStorage.setItem("user", JSON.stringify(userData));
         dispatch(login(userData));
-        toast.success("Xác thực thành công!");
+        toast.success("Xác thực 2FA thành công!");
         navigate("/");
       }
     } catch (err) {
-      const msg = err.response?.data?.message || "Mã xác thực không đúng";
+      const msg = err.response?.data?.message || "Mã xác thực không hợp lệ";
       toast.error(msg);
       setError(msg);
     } finally {
@@ -127,12 +128,12 @@ const SignIn = () => {
 
     setIsLoading(true);
     try {
-      const res = await axiosInstance.post("/pin/verify-login", {
+      const res = await axiosInstance.post("/user/verify-pin", {
         email,
         pin,
       });
 
-      if (res.data.success) {
+      if (res.data.errCode === 0) {
         const userData = {
           ...res.data.user,
           access_token: res.data.access_token,
@@ -153,164 +154,81 @@ const SignIn = () => {
   };
 
   return (
-    <div className="bg-bg-light/50 dark:bg-dark-bg min-h-screen flex items-center justify-center px-4 relative overflow-hidden transition-colors duration-500">
-      {/* Background Decorative Elements */}
+    <div className="bg-slate-950 min-h-screen flex items-center justify-center p-4 relative overflow-hidden text-white font-inter">
+      {/* Ambient Animated Glow Blobs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-primary/10 dark:bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
-        <div
-          className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/10 dark:bg-accent/20 rounded-full blur-[100px] animate-pulse"
-          style={{ animationDelay: "2s" }}
-        ></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-600/15 rounded-full blur-[140px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-emerald-500/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
       </div>
 
-      <div className="w-full max-w-sm bg-white/70 dark:bg-dark-card/70 backdrop-blur-2xl shadow-soft-xl rounded-[2rem] p-8 border border-white/40 dark:border-dark-border/40 relative z-10 animate-in fade-in zoom-in-95 duration-700">
-        <div className="flex flex-col items-center mb-8">
-          <div className="size-16 bg-primary rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-primary/40 mb-5 transform rotate-6 hover:rotate-0 transition-transform duration-500">
-            <svg
-              className="size-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
+      {/* Main Glass Card Container */}
+      <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-2xl shadow-2xl rounded-3xl p-7 sm:p-9 border border-slate-800 relative z-10 animate-in fade-in zoom-in-95 duration-500">
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="size-16 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-emerald-500 p-0.5 shadow-xl shadow-indigo-500/25 mb-4 group hover:scale-105 transition-transform duration-300">
+            <div className="size-full bg-slate-900 rounded-[0.9rem] flex items-center justify-center">
+              <FiBox className="size-8 text-sky-400" />
+            </div>
           </div>
-          <h1 className="text-3xl font-semibold text-text-primary dark:text-dark-text-primary tracking-tighter text-center leading-tight">
-            Chào mừng <br /> quay trở lại!
+          <Badge variant="primary" className="mb-2 bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+            SMART WMS V3.6 PRO
+          </Badge>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+            Chào Mừng Quay Trở Lại
           </h1>
-          <p className="text-text-secondary mt-2 text-xs font-semibold tracking-tight text-center">
-            Đăng nhập vào Smart WMS v3.6.0
+          <p className="text-slate-400 mt-1 text-xs font-medium">
+            Đăng nhập tài khoản quản trị kho hàng thời gian thực
           </p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSignin}>
+        <form className="space-y-4" onSubmit={handleSignin}>
           <Input
             label="Địa chỉ Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@company.com"
+            placeholder="admin@smartwms.com"
             required
             disabled={isLoading}
-            className="py-3 text-xs"
-            leftIcon={
-              <svg
-                className="size-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            }
+            leftIcon={<FiMail className="size-4" />}
           />
 
-          <div className="relative">
-            <Input
-              label="Mật khẩu"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu…"
-              required
-              disabled={isLoading}
-              className="py-3 text-xs"
-              leftIcon={
-                <svg
-                  className="size-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-              }
-              rightIcon={
-                <button
-                  type="button"
-                  className="text-text-tertiary hover:text-primary transition-colors focus:outline-none"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <svg
-                      className="size-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="size-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
-                </button>
-              }
-            />
-          </div>
+          <Input
+            label="Mật khẩu"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Nhập mật khẩu…"
+            required
+            disabled={isLoading}
+            leftIcon={<FiLock className="size-4" />}
+          />
 
           {error && !needs2FA && !needsPIN && (
-            <div className="text-error text-[10px] font-black bg-error/10 p-3 rounded-xl border border-error/20 animate-shake">
+            <div className="text-rose-400 text-xs font-bold bg-rose-500/10 p-3 rounded-xl border border-rose-500/20 animate-shake text-center">
               {error}
             </div>
           )}
 
           <Button
             type="submit"
-            className="w-full py-3.5 text-sm font-black tracking-tight"
-            size="md"
-            variant="primary"
+            className="w-full py-3.5 text-sm font-extrabold tracking-tight mt-2"
+            size="lg"
+            variant="gradient"
             isLoading={isLoading}
+            rightIcon={<FiArrowRight className="size-4" />}
           >
-            Đăng nhập ngay
+            Đăng Nhập Ngay
           </Button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-border/50 flex flex-col items-center">
-          <p className="text-xs text-text-secondary font-medium">
+        <div className="mt-7 pt-5 border-t border-slate-800 flex flex-col items-center">
+          <p className="text-xs text-slate-400 font-medium">
             Chưa có tài khoản?{" "}
             <Link
               to="/sign-up"
-              className="text-primary font-black hover:text-primary-dark transition-colors"
+              className="text-sky-400 font-black hover:text-sky-300 transition-colors ml-1"
             >
-              Đăng ký
+              Đăng ký ngay
             </Link>
           </p>
         </div>
@@ -324,40 +242,39 @@ const SignIn = () => {
           setOtp("");
           setError("");
         }}
-        title="Xác thực bảo mật"
+        title="Xác thực bảo mật 2FA"
         size="sm"
       >
-        <form className="space-y-6 p-2" onSubmit={handleVerify2FA}>
-          <div className="flex flex-col items-center">
-            <div className="size-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-4">
-              <FiShield size={32} />
+        <form className="space-y-5 p-1" onSubmit={handleVerify2FA}>
+          <div className="flex flex-col items-center text-center">
+            <div className="size-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3">
+              <FiShield size={28} />
             </div>
-            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest text-center mb-6">
-              Vui lòng nhập mã OTP từ ứng dụng Google Authenticator của bạn
+            <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-4">
+              Nhập mã OTP 6 chữ số từ ứng dụng Authenticator của bạn
             </p>
             <Input
-              label="Mã xác thực"
               type="text"
               maxLength={6}
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
               placeholder="000000"
-              className="text-center text-3xl tracking-[0.5em] font-black h-20 bg-bg-subtle/30"
+              className="text-center text-2xl tracking-[0.5em] font-black py-4"
               autoFocus
             />
           </div>
 
           {error && (
-            <div className="text-error text-[10px] font-black bg-error/5 p-3 rounded-xl border border-error/10 animate-shake text-center">
+            <div className="text-error text-xs font-bold bg-error/10 p-2.5 rounded-xl border border-error/20 text-center">
               {error}
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex gap-2.5">
             <Button
               type="button"
-              variant="outline"
-              className="flex-1 rounded-2xl"
+              variant="ghost"
+              className="flex-1"
               onClick={() => {
                 setNeeds2FA(false);
                 setError("");
@@ -368,11 +285,11 @@ const SignIn = () => {
             </Button>
             <Button
               type="submit"
-              className="flex-[2] rounded-2xl"
-              variant="primary"
+              className="flex-[2]"
+              variant="gradient"
               isLoading={isLoading}
             >
-              Xác nhận
+              Xác nhận OTP
             </Button>
           </div>
         </form>
@@ -386,40 +303,39 @@ const SignIn = () => {
           setPin("");
           setError("");
         }}
-        title="Mã PIN Bảo mật"
+        title="Xác thực Mã PIN Bảo mật"
         size="sm"
       >
-        <form className="space-y-6 p-2" onSubmit={handleVerifyPIN}>
-          <div className="flex flex-col items-center">
-            <div className="size-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-4">
-              <FiLock size={32} />
+        <form className="space-y-5 p-1" onSubmit={handleVerifyPIN}>
+          <div className="flex flex-col items-center text-center">
+            <div className="size-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+              <FiLock size={28} />
             </div>
-            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest text-center mb-6">
-              Nhập mã PIN 6 chữ số để xác nhận danh tính của bạn
+            <p className="text-xs font-semibold text-text-secondary dark:text-dark-text-secondary mb-4">
+              Nhập mã PIN 6 chữ số để xác nhận quyền truy cập
             </p>
             <Input
-              label="Mã PIN"
               type="password"
               maxLength={6}
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ""))}
               placeholder="••••••"
-              className="text-center text-3xl tracking-[0.8em] font-black h-20 bg-bg-subtle/30"
+              className="text-center text-2xl tracking-[0.5em] font-black py-4"
               autoFocus
             />
           </div>
 
           {error && (
-            <div className="text-error text-[10px] font-black bg-error/5 p-3 rounded-xl border border-error/10 animate-shake text-center">
+            <div className="text-error text-xs font-bold bg-error/10 p-2.5 rounded-xl border border-error/20 text-center">
               {error}
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex gap-2.5">
             <Button
               type="button"
-              variant="outline"
-              className="flex-1 rounded-2xl"
+              variant="ghost"
+              className="flex-1"
               onClick={() => {
                 setNeedsPIN(false);
                 setError("");
@@ -430,8 +346,8 @@ const SignIn = () => {
             </Button>
             <Button
               type="submit"
-              className="flex-[2] rounded-2xl"
-              variant="primary"
+              className="flex-[2]"
+              variant="gradient"
               isLoading={isLoading}
             >
               Xác nhận PIN
